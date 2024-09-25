@@ -1,12 +1,12 @@
 <template>
   <div id="app">
     <div class="container">
-      <!-- Button to toggle the menu visibility -->
+
       <button class="menu-toggle" @click="toggleMenu">
         {{ isMenuVisible ? 'Hide Menu' : 'Show Menu' }}
       </button>
 
-      <!-- Left Menu (collapsible) -->
+
       <transition name="slide">
         <div class="menu" v-if="isMenuVisible">
           <ul>
@@ -19,12 +19,10 @@
       <!-- Content (Cards) -->
       <div class="content">
         <h1>Person Cards</h1>
-        <!-- Buttons to sort by date and rating -->
         <button @click="sortByDate">Sort by Date</button>
         <button @click="sortByRating">Sort by Rating</button>
 
         <div class="card-container">
-          <!-- Cards for each person -->
           <div class="card" v-for="person in paginatedPersons" :key="person.id">
             <img :src="person.Avatar" alt="avatar" class="avatar" />
             <div class="card-info">
@@ -74,10 +72,10 @@ export default {
         { id: 18, PersonName: 'Bruce Wayne', Avatar: 'https://i.pravatar.cc/150?img=18', PubDate: '2023-09-03', Rating: 4.8, Commentary: 'Great work!', Topic: 'HTML' },
         { id: 19, PersonName: 'Clark Kent', Avatar: 'https://i.pravatar.cc/150?img=19', PubDate: '2023-09-02', Rating: 4.0, Commentary: 'Nice presentation.', Topic: 'Vue.js Development' },
         { id: 20, PersonName: 'Peter Parker', Avatar: 'https://i.pravatar.cc/150?img=20', PubDate: '2023-09-01', Rating: 4.4, Commentary: 'Very interesting.', Topic: 'Web Development' },
-        // Continue adding data up to 20 persons
+
       ],
       selectedTopic: 'All',
-      isMenuVisible: false, // Controls the visibility of the menu
+      isMenuVisible: false,
       currentPage: 1,
       perPage: 4,
     };
@@ -93,9 +91,8 @@ export default {
         return this.filteredPersons.slice(start, end);
     },
     availableTopics() {
-      // Извлечение уникальных тем
       const topics = this.persons.map(person => person.Topic);
-      return [...new Set(topics)]; // Удаляем дубликаты
+      return [...new Set(topics)];
     },
     filteredPersons() {
       if (this.selectedTopic === 'All') {
@@ -117,7 +114,7 @@ export default {
       this.currentPage = 1
     },
     toggleMenu() {
-      this.isMenuVisible = !this.isMenuVisible; // Toggle menu visibility on button click
+      this.isMenuVisible = !this.isMenuVisible;
     },
     prevPage(){
       if(this.currentPage > 1){
@@ -135,7 +132,6 @@ export default {
 </script>
 
 <style>
-/* Container to hold the sidebar and content */
 .container {
   display: flex;
   flex-direction: row;
@@ -151,24 +147,11 @@ export default {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  z-index: 10; /* Make sure the button is above the menu */
+  z-index: 10;
 }
 
 .menu-toggle:hover {
   background-color: #1aab73;
-}
-
-/* Slide transition for the menu */
-.slide-enter-active, .slide-leave-active {
-  transition: all 0.5s ease;
-}
-
-.slide-enter {
-  transform: translateX(-100%);
-}
-
-.slide-leave-to {
-  transform: translateX(-100%);
 }
 
 .menu {
@@ -181,7 +164,7 @@ export default {
   height: 100vh;
   overflow-y: auto;
   border-right: 1px solid #ffffff;
-  z-index: 1; /* Keep the menu below the button */
+  z-index: 1;
 }
 
 .menu h2 {
