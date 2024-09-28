@@ -1,5 +1,10 @@
 <template>
   <div id="app">
+    <header class="main-header">
+      <h1>New courses on Fall season!</h1>
+      <p>Full details on our Instagram</p>
+    </header>
+
     <div class="container">
 
       <button class="menu-toggle" @click="toggleMenu">
@@ -7,20 +12,22 @@
       </button>
 
 
-      <transition name="slide">
-        <div class="menu" v-if="isMenuVisible">
-          <ul>
-            <li @click="filterByTopic('All')">All Persons</li>
-            <li v-for="topic in availableTopics" :key="topic" @click="filterByTopic(topic)">{{ topic }}</li>
-          </ul>
-        </div>
-      </transition>
 
-      <!-- Content (Cards) -->
+      <div class="menu" v-if="isMenuVisible">
+        <ul>
+          <li @click="filterByTopic('All')">All Persons</li>
+          <li v-for="topic in availableTopics" :key="topic" @click="filterByTopic(topic)">{{ topic }}</li>
+        </ul>
+      </div>
+
       <div class="content">
         <h1>Person Cards</h1>
-        <button @click="sortByDate">Sort by Date</button>
-        <button @click="sortByRating">Sort by Rating</button>
+
+        <select id="optionSelect" v-model="sortOption" @change="applySort">
+          <option value="date">Date</option>
+          <option value="rating">Rating</option>
+        </select>
+
 
         <div class="card-container">
           <div class="card" v-for="person in paginatedPersons" :key="person.id">
@@ -47,7 +54,7 @@
 
 <script>
 
-
+import _ from 'lodash';
 export default {
   data() {
     return {
@@ -78,6 +85,7 @@ export default {
       isMenuVisible: false,
       currentPage: 1,
       perPage: 4,
+      sortOption: 'date',
     };
   },
 
@@ -88,7 +96,7 @@ export default {
     paginatedPersons(){
         const start = (this.currentPage - 1) * this.perPage;
         const end = start + this.perPage;
-        return this.filteredPersons.slice(start, end);
+        return this.sortedPersons.slice(start, end);
     },
     availableTopics() {
       const topics = this.persons.map(person => person.Topic);
@@ -100,15 +108,21 @@ export default {
       } else {
         return this.persons.filter(person => person.Topic === this.selectedTopic);
       }
+    },
+    sortedPersons() {
+      if (this.sortOption === 'date') {
+        return _.orderBy(this.filteredPersons, ['PubDate'], ['desc']);
+      } else if (this.sortOption === 'rating') {
+        return _.orderBy(this.filteredPersons, ['Rating'], ['desc']);
+      }
+      return this.filteredPersons;
     }
   },
   methods: {
-    sortByDate() {
-      this.filteredPersons.sort((a, b) => new Date(b.PubDate) - new Date(a.PubDate));
-    },
-    sortByRating() {
-      this.filteredPersons.sort((a, b) => b.Rating - a.Rating);
-    },
+    applySort(){
+      this.currentPage = 1;
+    }
+    ,
     filterByTopic(topic) {
       this.selectedTopic = topic;
       this.currentPage = 1
@@ -131,10 +145,37 @@ export default {
 };
 </script>
 
+
 <style>
+
+.main-header {
+  background-color: #7ed56f; /* Светло-зеленый фон */
+  color: white;
+  text-align: center;
+  padding: 20px 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Легкая тень */
+  font-family: 'Arial', sans-serif;
+}
+
+.main-header h1 {
+  font-size: 28px;
+  margin: 0;
+  padding: 5px 0;
+  font-weight: bold;
+}
+
+.main-header p {
+  font-size: 16px;
+  margin: 0;
+  font-style: italic;
+}
+
 .container {
   display: flex;
   flex-direction: row;
+  background-color: #f9fdf9;
+  min-height: 100vh;
+  font-family: 'Arial', sans-serif;
 }
 
 .menu-toggle {
@@ -142,34 +183,33 @@ export default {
   top: 20px;
   left: 20px;
   padding: 10px 20px;
-  background-color: #42b983;
+  background-color: #7ed56f;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 30px;
+  font-size: 16px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
   z-index: 10;
 }
 
 .menu-toggle:hover {
-  background-color: #1aab73;
+  background-color: #6ac65e;
 }
 
 .menu {
-  width: 200px;
-  padding: 10px;
-  background-color: #ffffff;
+  width: 220px;
+  background-color: white;
+  border: 1px solid #e6f2e6;
+  border-radius: 10px;
+  padding: 15px;
   position: fixed;
   top: 70px;
-  left: 0;
-  height: 100vh;
+  left: 20px;
+  height: 80vh;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
-  border-right: 1px solid #ffffff;
   z-index: 1;
-}
-
-.menu h2 {
-  font-size: 18px;
-  margin-bottom: 15px;
 }
 
 .menu ul {
@@ -178,59 +218,113 @@ export default {
 }
 
 .menu li {
-  padding: 10px;
+  padding: 10px 15px;
   cursor: pointer;
   color: #333;
-  border-bottom: 1px solid #ccc;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .menu li:hover {
-  background-color: #ddd;
+  background-color: #7ed56f;
+  color: white;
 }
 
+
 .content {
-  margin-left: 220px;
+  margin-left: 260px;
   padding: 20px;
+  flex-grow: 1;
 }
+
 
 .card-container {
   display: flex;
-  justify-content: space-around;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 20px;
-  margin-bottom: 20px;
 }
 
 .card {
-  width: 200px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 10px;
-  text-align: center;
+  width: 250px;
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease;
 }
 
-.avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
+.card:hover {
+  transform: translateY(-10px);
+}
+
+.card img {
+  width: 100%;
+  height: 150px;
   object-fit: cover;
 }
 
 .card-info {
-  margin-top: 10px;
+  padding: 15px;
+  text-align: center;
 }
 
-button {
-  margin: 15px;
-  padding: 10px 20px;
-  background-color: #42b983;
+.card-info h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.card-info p {
+  font-size: 14px;
+  margin-bottom: 5px;
+  color: #666;
+}
+
+.card-info strong {
+  color: #7ed56f;
+}
+
+
+.pagination-buttons {
+  margin-top: 20px;
+}
+
+.pagination-buttons button {
+  background-color: #7ed56f;
   color: white;
   border: none;
-  border-radius: 5px;
+  padding: 10px 20px;
+  margin: 0 5px;
+  border-radius: 30px;
+  font-size: 14px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-button:hover {
-  background-color: #1aab73;
+.pagination-buttons button:disabled {
+  background-color: #d4e8d4;
+  cursor: not-allowed;
 }
+
+.pagination-buttons button:not(:disabled):hover {
+  background-color: #6ac65e;
+}
+
+select {
+  padding: 10px;
+  border: 1px solid #e6f2e6;
+  border-radius: 30px;
+  background-color: white;
+  color: #333;
+  font-size: 14px;
+  margin: 10px 0;
+  transition: border-color 0.3s ease;
+}
+
+select:focus {
+  outline: none;
+  border-color: #7ed56f;
+}
+
 </style>
